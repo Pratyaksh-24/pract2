@@ -87,7 +87,7 @@ export default function Footer() {
           </div>
 
           {/* Newsletter & Social */}
-          <div className="col-span-1">
+          <div id="reserve" className="col-span-1">
             <h4 className="text-label tracking-widest text-aged-cream/40 uppercase mb-4">
               For those who appreciate patience.
             </h4>
