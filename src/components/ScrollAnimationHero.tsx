@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ChevronDown, Play } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import Link from "next/link";
 
 // Register ScrollTrigger plugin for GSAP
@@ -21,15 +21,13 @@ export default function ScrollAnimationHero() {
   const targetFrameRef = useRef<number>(1);
   const currentFrameRef = useRef<number>(1);
   
-  // Text & Audio refs for luxury overlays
+  // Text refs for luxury overlays
   const textOuterRef = useRef<HTMLDivElement>(null);
   const textInnerRef = useRef<HTMLDivElement>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
   const ctxRef = useRef<gsap.Context | null>(null);
 
   // Loading status state
   const [firstFrameLoaded, setFirstFrameLoaded] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
 
   // 1. Initial Load & Background Progression Queue
   useEffect(() => {
@@ -180,10 +178,11 @@ export default function ScrollAnimationHero() {
     }, containerRef);
 
     // Bind scroll progress directly to our target frame ref
+    // Pinned until the bottom of container reaches the bottom of the viewport
     const trigger = ScrollTrigger.create({
       trigger: scrollContainer,
       start: "top top",
-      end: "+=250%", // Pins for 2.5x the viewport height
+      end: "bottom bottom",
       pin: stickySection,
       scrub: true,
       invalidateOnRefresh: true,
@@ -228,28 +227,6 @@ export default function ScrollAnimationHero() {
       });
     };
 
-    // Auto-unmute on first user interaction
-    const handleFirstInteraction = () => {
-      const audio = audioRef.current;
-      if (audio && isMuted) {
-        audio.muted = false;
-        audio.volume = 0;
-        audio.play().catch(() => {});
-        gsap.to(audio, {
-          volume: 0.35,
-          duration: 3,
-          ease: "power1.inOut",
-        });
-        setIsMuted(false);
-      }
-      cleanupListeners();
-    };
-
-    const cleanupListeners = () => {
-      document.removeEventListener("click", handleFirstInteraction);
-      document.removeEventListener("scroll", handleFirstInteraction);
-    };
-
     // Subtle breathing glow animation behind the text container
     const breathingTween = gsap.to(".text-glow-panel", {
       boxShadow: "0 0 50px 15px rgba(10, 10, 10, 0.5)",
@@ -260,8 +237,6 @@ export default function ScrollAnimationHero() {
       ease: "sine.inOut",
     });
 
-    document.addEventListener("click", handleFirstInteraction);
-    document.addEventListener("scroll", handleFirstInteraction);
     window.addEventListener("mousemove", handleMouseMove);
 
     // Handle canvas resizing dynamically
@@ -275,17 +250,16 @@ export default function ScrollAnimationHero() {
       breathingTween.kill();
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("mousemove", handleMouseMove);
-      cleanupListeners();
       if (ctxRef.current) ctxRef.current.revert();
     };
-  }, [firstFrameLoaded, isMuted]);
+  }, [firstFrameLoaded]);
 
   // 3. Liquid-Smooth Animation loop using LERP and RequestAnimationFrame
   useEffect(() => {
     if (!firstFrameLoaded) return;
 
     let rafId: number;
-    const interpolationFactor = 0.12; // Easing value (lower = smoother cinematic delay, higher = snappier)
+    const interpolationFactor = 0.12; // Easing value (lower = smoother delay, higher = snappier)
 
     const tick = () => {
       // Smoothly interpolate current frame towards the target frame scrolled to
@@ -296,52 +270,12 @@ export default function ScrollAnimationHero() {
         drawFrame(currentFrameRef.current);
       }
 
-      // Synchronize ambient audio time to match video scrub time
-      const audio = audioRef.current;
-      if (audio && !audio.paused) {
-        // Map 178 frames linearly to the audio's duration
-        const targetAudioTime = ((currentFrameRef.current - 1) / (TOTAL_FRAMES - 1)) * (audio.duration || 5);
-        const delta = Math.abs(audio.currentTime - targetAudioTime);
-        if (delta > 0.3) {
-          audio.currentTime = targetAudioTime;
-        }
-      }
-
       rafId = requestAnimationFrame(tick);
     };
 
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
   }, [firstFrameLoaded]);
-
-  // Luxury Audio Control Button Action
-  const toggleMute = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (isMuted) {
-      audio.muted = false;
-      audio.volume = 0;
-      audio.play().catch(() => {});
-      gsap.to(audio, {
-        volume: 0.35,
-        duration: 1.5,
-        ease: "power2.inOut",
-      });
-      setIsMuted(false);
-    } else {
-      gsap.to(audio, {
-        volume: 0,
-        duration: 1.0,
-        ease: "power2.inOut",
-        onComplete: () => {
-          audio.pause();
-          audio.muted = true;
-          setIsMuted(true);
-        },
-      });
-    }
-  };
 
   return (
     <div 
@@ -352,22 +286,13 @@ export default function ScrollAnimationHero() {
     >
       <div 
         ref={stickyRef} 
-        className="w-full h-screen sticky top-0 overflow-hidden flex flex-col items-center justify-center bg-obsidian z-10"
+        className="relative w-full h-screen overflow-hidden flex flex-col items-center justify-center bg-obsidian z-10"
       >
         {/* Viewport Pinned Canvas */}
         <canvas
           ref={canvasRef}
           className="absolute inset-0 w-full h-full object-cover z-0"
           style={{ willChange: "transform" }}
-        />
-
-        {/* Ambient Loopable Audio Tag for high-fidelity soundtrack synchronization */}
-        <audio 
-          ref={audioRef} 
-          src="/0529.mp4" 
-          loop 
-          muted 
-          preload="auto" 
         />
 
         {/* Cinematic Vignette Overlay */}
@@ -378,41 +303,6 @@ export default function ScrollAnimationHero() {
 
         {/* Immersive bottom fade to next content */}
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-obsidian to-transparent pointer-events-none z-2" />
-
-        {/* Minimal Luxury Audio Soundwave Button */}
-        <div className="absolute bottom-10 right-10 z-30 flex items-center gap-4">
-          <button 
-            onClick={toggleMute}
-            aria-label={isMuted ? "Unmute atmospheric audio" : "Mute atmospheric audio"}
-            className="group relative flex items-center justify-center w-14 h-14 rounded-full border border-aged-cream/20 bg-obsidian/45 backdrop-blur-md text-aged-cream hover:border-amber-gold hover:text-amber-gold transition-all duration-500 overflow-hidden"
-          >
-            <span className="absolute inset-0 rounded-full bg-amber-gold/5 scale-0 group-hover:scale-100 transition-transform duration-500" />
-            
-            <div className="relative z-10 flex items-center gap-[3px]">
-              {isMuted ? (
-                // Silent Wave Bars
-                <div className="flex items-center gap-[2px] opacity-60 group-hover:opacity-100 transition-opacity">
-                  <span className="w-[2px] h-3 bg-current rounded-full" />
-                  <span className="w-[2px] h-2 bg-current rounded-full" />
-                  <span className="w-[2px] h-1 bg-current rounded-full" />
-                  <span className="absolute w-5 h-[1.5px] bg-aged-cream/60 group-hover:bg-amber-gold rotate-45 left-[-2px] transition-colors" />
-                </div>
-              ) : (
-                // Animating Fluid Bars
-                <div className="flex items-end gap-[3px] h-4">
-                  <span className="w-[2px] h-2 bg-amber-gold rounded-full animate-[pulse-wave_1.2s_infinite_ease-in-out_alternate]" />
-                  <span className="w-[2px] h-4 bg-amber-gold rounded-full animate-[pulse-wave_0.8s_infinite_ease-in-out_alternate]" style={{ animationDelay: '0.2s' }} />
-                  <span className="w-[2px] h-3 bg-amber-gold rounded-full animate-[pulse-wave_1.0s_infinite_ease-in-out_alternate]" style={{ animationDelay: '0.4s' }} />
-                  <span className="w-[2px] h-2.5 bg-amber-gold rounded-full animate-[pulse-wave_0.7s_infinite_ease-in-out_alternate]" style={{ animationDelay: '0.1s' }} />
-                </div>
-              )}
-            </div>
-          </button>
-          
-          <span className="hidden sm:inline-block text-[11px] font-accent uppercase tracking-[0.25em] text-aged-cream/40 select-none">
-            {isMuted ? "Sound Off" : "Cinema Audio"}
-          </span>
-        </div>
 
         {/* Editorial Luxury Typography overlay box */}
         <div 
@@ -460,18 +350,6 @@ export default function ScrollAnimationHero() {
                 </span>
                 <div className="absolute inset-0 bg-amber-gold transform -translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-in-out" />
               </Link>
-
-              <button 
-                onClick={toggleMute}
-                className="flex items-center justify-center gap-3 text-aged-cream/80 hover:text-amber-gold transition-colors duration-500 py-2 px-4 group"
-              >
-                <span className="flex items-center justify-center w-9 h-9 rounded-full border border-aged-cream/20 group-hover:border-amber-gold/50 group-hover:scale-105 transition-all duration-500">
-                  <Play size={13} className="ml-0.5 fill-current" />
-                </span>
-                <span className="text-xs uppercase tracking-[0.18em] font-medium">
-                  {isMuted ? "Listen to the Pour" : "Mute Sound"}
-                </span>
-              </button>
             </div>
           </div>
         </div>
