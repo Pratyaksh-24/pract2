@@ -71,7 +71,7 @@ export default function Technique() {
         >
           <div className="absolute inset-0 bg-gradient-to-r from-transparent to-obsidian/50 z-10 pointer-events-none" />
           
-          <div className="relative w-full max-w-md aspect-[3/4] glass-panel rounded-lg flex items-center justify-center overflow-hidden transition-all duration-1000 ease-in-out">
+          <div className="relative w-full max-w-md aspect-[3/4] border border-amber-gold/20 bg-obsidian/45 rounded-lg flex items-center justify-center overflow-hidden transition-all duration-1000 ease-in-out shadow-[0_0_50px_rgba(0,0,0,0.8)]">
             {/* Mock Visual State representing the cocktail layers */}
             <div className="absolute inset-0 flex flex-col justify-end opacity-80">
               {/* Kahlua Layer */}

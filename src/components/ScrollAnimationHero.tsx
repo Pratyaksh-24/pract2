@@ -18,7 +18,6 @@ export default function ScrollAnimationHero() {
   
   // High performance refs to avoid re-triggering React renders during scroll/RAF loops
   const loadedFramesRef = useRef<{ [key: number]: HTMLImageElement }>({});
-  const targetFrameRef = useRef<number>(1);
   const currentFrameRef = useRef<number>(1);
   
   // Text refs for luxury overlays
@@ -189,7 +188,8 @@ export default function ScrollAnimationHero() {
       onUpdate: (self) => {
         // Map progress (0 to 1) linearly to frames (1 to TOTAL_FRAMES)
         const frameIndex = 1 + self.progress * (TOTAL_FRAMES - 1);
-        targetFrameRef.current = frameIndex;
+        currentFrameRef.current = frameIndex;
+        drawFrame(frameIndex);
 
         // Animate text overlay exit: fades, blurs, and drifts upward, finishing exactly by 40% progress
         if (textOuterRef.current) {
@@ -252,29 +252,6 @@ export default function ScrollAnimationHero() {
       window.removeEventListener("mousemove", handleMouseMove);
       if (ctxRef.current) ctxRef.current.revert();
     };
-  }, [firstFrameLoaded]);
-
-  // 3. Liquid-Smooth Animation loop using LERP and RequestAnimationFrame
-  useEffect(() => {
-    if (!firstFrameLoaded) return;
-
-    let rafId: number;
-    const interpolationFactor = 0.12; // Easing value (lower = smoother delay, higher = snappier)
-
-    const tick = () => {
-      // Smoothly interpolate current frame towards the target frame scrolled to
-      const diff = targetFrameRef.current - currentFrameRef.current;
-      
-      if (Math.abs(diff) > 0.01) {
-        currentFrameRef.current += diff * interpolationFactor;
-        drawFrame(currentFrameRef.current);
-      }
-
-      rafId = requestAnimationFrame(tick);
-    };
-
-    rafId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafId);
   }, [firstFrameLoaded]);
 
   return (

@@ -64,9 +64,64 @@ export default function Ingredients() {
                   {item.number}
                 </span>
                 
-                {/* Visual placeholder - in a real implementation we'd use SVG illustrations */}
-                <div className="w-48 h-48 rounded-full border border-amber-gold/20 relative z-10 glass-panel flex items-center justify-center overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-kahlua-brown/20 to-transparent opacity-50 mix-blend-overlay"></div>
+                {/* Crisp, Sharp SVG illustrations representing the luxury ingredients */}
+                <div className="w-48 h-48 rounded-full border border-amber-gold/20 relative z-10 bg-obsidian/60 flex items-center justify-center overflow-hidden group-hover:border-amber-gold/60 transition-all duration-700">
+                  <div className="absolute inset-0 bg-gradient-to-tr from-kahlua-brown/10 to-transparent opacity-30 mix-blend-overlay"></div>
+                  {item.number === "01" && (
+                    <svg viewBox="0 0 100 100" className="w-24 h-24 text-amber-gold fill-none transition-transform duration-700 group-hover:scale-110" stroke="currentColor">
+                      <path 
+                        d="M30,20 C15,35 15,65 30,80 C45,95 75,85 80,65 C85,45 75,15 50,15 C40,15 33,18 30,20 Z" 
+                        className="stroke-amber-gold/40 fill-kahlua-brown/15"
+                        strokeWidth="1.5"
+                      />
+                      <path 
+                        d="M50,15 C45,35 55,45 45,65 C38,80 50,85 50,85" 
+                        className="stroke-amber-gold"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                      <circle cx="50" cy="50" r="42" className="stroke-amber-gold/15" strokeDasharray="3 3" />
+                    </svg>
+                  )}
+                  {item.number === "02" && (
+                    <svg viewBox="0 0 100 100" className="w-24 h-24 text-aged-cream fill-none transition-transform duration-700 group-hover:scale-110" stroke="currentColor">
+                      <polygon 
+                        points="50,10 85,40 50,90 15,40" 
+                        className="stroke-aged-cream/30 fill-white/5" 
+                        strokeWidth="1.5"
+                      />
+                      <line x1="50" y1="10" x2="50" y2="90" className="stroke-aged-cream/50" strokeWidth="1" />
+                      <line x1="15" y1="40" x2="85" y2="40" className="stroke-aged-cream/50" strokeWidth="1" />
+                      <polygon 
+                        points="50,25 70,40 50,70 30,40" 
+                        className="stroke-amber-gold/60" 
+                        strokeWidth="1.5"
+                      />
+                    </svg>
+                  )}
+                  {item.number === "03" && (
+                    <svg viewBox="0 0 100 100" className="w-24 h-24 text-amber-gold fill-none transition-transform duration-700 group-hover:scale-110" stroke="currentColor">
+                      <path 
+                        d="M20,50 C30,30 40,70 50,50 C60,30 70,70 80,50" 
+                        className="stroke-amber-gold/80" 
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                      <path 
+                        d="M15,60 C25,45 35,75 50,60 C65,45 75,75 85,60" 
+                        className="stroke-aged-cream/30" 
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                      />
+                      <path 
+                        d="M25,40 C35,25 45,55 50,40 C55,25 65,55 75,40" 
+                        className="stroke-aged-cream/30" 
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                      />
+                      <circle cx="50" cy="50" r="38" className="stroke-amber-gold/15" />
+                    </svg>
+                  )}
                 </div>
               </div>
               
